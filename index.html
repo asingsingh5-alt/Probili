@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission:Probability</title>
+
+<style>
+  @keyframes fadeZoomIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 10px #00eaff, 0 0 20px #00eaff; }
+    50% { box-shadow: 0 0 20px #00eaff, 0 0 40px #00eaff; }
+  }
+  @keyframes revealLetter {
+    from { opacity: 0; transform: scale(0.5) rotate(-10deg); }
+    to { opacity: 1; transform: scale(1) rotate(0); }
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
+    background-image: url('https://i.ibb.co/JFKKs63J/IMG-5410.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    margin: 0; padding: 0;
+    animation: fadeZoomIn 1.5s ease-in-out;
+  }
+
+  #game-container {
+    background: rgba(0,0,0,0.75);
+    margin: 5% auto;
+    padding: 40px;
+    border-radius: 15px;
+    width: 85%;
+    max-width: 650px;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(255,255,255,0.1);
+    animation: fadeZoomIn 2s ease;
+  }
+
+  h1 { color: #00eaff; font-size: 2.2em; animation: pulseGlow 3s infinite; }
+  #question { font-size: 1.1em; margin: 20px 0; }
+  input {
+    padding: 10px; width: 80%;
+    border: none; border-radius: 5px;
+    margin-bottom: 15px; font-size: 1em;
+    background: rgba(255,255,255,0.1); color: #fff;
+  }
+  button {
+    background: linear-gradient(45deg, #00bcd4, #00eaff);
+    color: white; border: none; border-radius: 5px;
+    padding: 10px 20px; margin: 8px;
+    font-size: 1em; cursor: pointer; transition: 0.3s;
+  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  #nextBtn { background: #00ff99; color: #000; font-weight: bold; }
+  #nextBtn.active { animation: pulseGlow 2s infinite; }
+  .letter { display: inline-block; animation: revealLetter 0.6s ease; color: #ffea00; font-weight: bold; }
+</style>
+</head>
+
+<body>
+<div id="game-container">
+  <h1>🎲Mission: Probability🎲</h1>
+  <p><i>answer questions to reveal the secret word!</i></p>
+
+  <button id="startBtn">🤓 Start Game</button>
+
+  <div id="game" style="display:none;">
+    <p id="question"></p>
+    <input id="answer" type="text" placeholder="Enter your probability" oninput="enableSubmit()"><br>
+    <button id="submitBtn" onclick="submitAnswer()" disabled>Submit Answer</button>
+    <button id="nextBtn" onclick="nextQuestion()" disabled>Next ➜</button>
+    <p id="result"></p>
+    <p id="simulation"></p>
+    <h2 id="progress">Unlocked letters: </h2>
+  </div>
+</div>
+
+<script>
+
+const levels = [
+  { 
+    letter: 'G', 
+    q: 'You roll a 6-sided die once. What is the probability of NOT rolling a number greater than 4?', 
+    a: '2/6', 
+    simulation: 'Numbers greater than 4 are 5 and 6, so 4 numbers are NOT greater than 4. P(not greater than 4) = 4/6 = 2/3.' 
+  },
+
+  { 
+    letter: 'I', 
+    q: 'A bag has 3 red and 2 blue marbles. You draw one marble, replace it, and draw again. What is the probability both are blue?', 
+    a: '4/25', 
+    simulation: 'Each draw has a 2/5 chance of being blue. With replacement: 2/5 × 2/5 = 4/25.' 
+  },
+
+  { 
+    letter: 'M', 
+    q: 'A coin is flipped twice. What is the probability of getting at least one head?', 
+    a: '3/4', 
+    simulation: 'Complementary thinking: only 1 outcome (TT) has no heads. 1 − 1/4 = 3/4.' 
+  },
+
+  { 
+    letter: 'S', 
+    q: 'A bag contains 4 red and 1 blue marble. You draw two marbles WITHOUT replacement. What is the probability both are red?', 
+    a: '3/5', 
+    simulation: 'First red: 4/5. Then 3 red left from 4 total → 3/4. Multiply: 4/5 × 3/4 = 3/5.' 
+  },
+
+  { 
+    letter: 'A', 
+    q: 'A spinner has 5 equal sections: 1, 2, 3, 4, 5. What is the probability of NOT spinning an even number?', 
+    a: '3/5', 
+    simulation: 'Even numbers are 2 and 4 → 2 out of 5. So P(not even) = 1 − 2/5 = 3/5.' 
+  }
+];
+
+let current = -1;
+let unlocked = [];
+
+function enableSubmit() {
+  document.getElementById("submitBtn").disabled = document.getElementById("answer").value.trim().length === 0;
+}
+
+function nextQuestion() {
+  current++;
+  const q = document.getElementById("question");
+  const result = document.getElementById("result");
+  const sim = document.getElementById("simulation");
+  const submit = document.getElementById("submitBtn");
+  const next = document.getElementById("nextBtn");
+
+  if (current >= levels.length) {
+    q.textContent = "🎉 Excellent work! Now decrypt the letters to find the word";
+    result.textContent = "";
+    sim.textContent = "";
+    submit.disabled = true;
+    next.disabled = true;
+    return;
+  }
+
+  const level = levels[current];
+  q.textContent = level.q;
+  result.textContent = "";
+  sim.textContent = "";
+  document.getElementById("answer").value = "";
+  submit.disabled = true;
+  next.disabled = true;
+}
+
+function submitAnswer() {
+  const user = document.getElementById("answer").value.trim().toLowerCase();
+  const level = levels[current];
+  const correct = level.a.toLowerCase();
+
+  if (user === correct) {
+    if (!unlocked.includes(level.letter)) unlocked.push(level.letter);
+
+    document.getElementById("result").innerHTML =
+      `🎉 Congratulations! You’ve unlocked <span class="letter">${level.letter}</span>!`;
+
+    document.getElementById("simulation").textContent = level.simulation;
+
+    document.getElementById("progress").innerHTML =
+      "Unlocked letters: " + unlocked.map(l => `<span class='letter'>${l}</span>`).join(' ');
+
+    document.getElementById("nextBtn").disabled = false;
+  } else {
+    document.getElementById("result").textContent =
+      "❌ Try again! Hint: simplify your answer or use decimals.";
+  }
+}
+
+// Start button
+document.getElementById("startBtn").addEventListener("click", () => {
+  document.getElementById("startBtn").style.display = "none";
+  document.getElementById("game").style.display = "block";
+  nextQuestion();
+});
+</script>
+</body>
+</html>
